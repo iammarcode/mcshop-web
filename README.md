@@ -6,10 +6,10 @@ Customer-facing web application of MCShop built with React, TypeScript, Docker, 
 
 - ⚛️ **React 18** with TypeScript
 - 🐳 **Docker** containerization with multi-stage builds
-- 🌐 **Nginx** reverse proxy with API routing
+- 🌐 **Nginx** reverse proxy for static file serving
 - 🔄 **Hot reloading** for development
 - 📱 **Responsive design** with modern UI
-- 🔌 **API integration** with axios
+- 🔌 **API integration** with axios for Spring Boot backend
 - 🚀 **Production-ready** build configuration
 
 ## Project Structure
@@ -23,7 +23,6 @@ mcshop-web/
 │   ├── App.tsx            # Main App component
 │   └── index.tsx          # Entry point
 ├── public/                # Static assets
-├── backend/               # Simple Express.js API server
 ├── Dockerfile             # Production Docker build
 ├── Dockerfile.dev         # Development Docker build
 ├── docker-compose.yml     # Docker Compose configuration
@@ -37,60 +36,55 @@ mcshop-web/
 
 - Docker and Docker Compose
 - Node.js 18+ (for local development)
+- Spring Boot backend running on port 8080 (separate repository)
 
 ### Development with Hot Reloading
 
 1. **Start the development environment:**
    ```bash
-   docker-compose up frontend backend
+   docker-compose up frontend
    ```
 
 2. **Access the application:**
    - Frontend: http://localhost:3000
-   - Backend API: http://localhost:3001
-   - API Health Check: http://localhost:3001/api/health
+   - Backend API: http://localhost:8080 (Spring Boot backend)
 
-3. **View API endpoints:**
+3. **API endpoints (Spring Boot backend):**
    - GET `/api/products` - List all products
-   - GET `/api/products/:id` - Get specific product
+   - GET `/api/products/{id}` - Get specific product
    - POST `/api/products` - Create new product
 
 ### Production Build
 
 1. **Build and run production version:**
    ```bash
-   docker-compose up frontend-prod backend
+   docker-compose up frontend-prod
    ```
 
 2. **Access the production application:**
    - Frontend: http://localhost:8080
-   - Backend API: http://localhost:3001
+   - Backend API: http://localhost:8080 (Spring Boot backend)
 
 ### Local Development (without Docker)
 
 1. **Install dependencies:**
    ```bash
    npm install
-   cd backend && npm install
    ```
 
-2. **Start backend server:**
-   ```bash
-   cd backend
-   npm start
-   ```
-
-3. **Start frontend development server:**
+2. **Start frontend development server:**
    ```bash
    npm start
    ```
+
+3. **Ensure Spring Boot backend is running on port 8080**
 
 ## API Integration
 
-The frontend is configured to communicate with the backend API through:
+The frontend is configured to communicate with the Spring Boot backend through:
 
-- **Development:** Proxy configuration in `package.json` (http://localhost:3001/api)
-- **Production:** Nginx reverse proxy configuration
+- **Development:** Direct API calls to http://localhost:8080/api
+- **Production:** Direct API calls to the same domain
 
 ### API Service Layer
 
@@ -115,7 +109,6 @@ The application includes a comprehensive API service layer (`src/services/api.ts
 - Includes security headers and compression
 
 ### Nginx Configuration
-- Reverse proxy for API calls
 - Static file serving with caching
 - React Router support
 - Gzip compression
@@ -123,7 +116,7 @@ The application includes a comprehensive API service layer (`src/services/api.ts
 
 ## Environment Variables
 
-- `REACT_APP_API_URL` - Backend API URL (defaults to http://localhost:3001/api)
+- `REACT_APP_API_URL` - Spring Boot backend API URL (defaults to http://localhost:8080/api)
 - `NODE_ENV` - Environment mode (development/production)
 
 ## Available Scripts

@@ -13,24 +13,7 @@ services:
       - /app/node_modules
     environment:
       - CHOKIDAR_USEPOLLING=true
-      - REACT_APP_API_URL=http://localhost:3001/api
-    depends_on:
-      - backend
-    networks:
-      - mcshop-network
-
-  # Backend API service (placeholder)
-  backend:
-    image: node:18-alpine
-    ports:
-      - "3001:3001"
-    volumes:
-      - ./backend:/app
-    working_dir: /app
-    command: >
-      sh -c "npm install && npm start"
-    environment:
-      - NODE_ENV=development
+      - REACT_APP_API_URL=http://localhost:8080/api
     networks:
       - mcshop-network
 
@@ -41,8 +24,6 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8080:80"
-    depends_on:
-      - backend
     networks:
       - mcshop-network
 

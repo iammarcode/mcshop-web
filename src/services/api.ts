@@ -3,7 +3,7 @@ import { Product, ApiResponse } from '../types';
 
 // Create axios instance with base configuration
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:3001/api',
+  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:8080/api',
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -37,11 +37,11 @@ api.interceptors.response.use(
   }
 );
 
-// API functions
+// API functions for Spring Boot backend
 export const fetchProducts = async (): Promise<Product[]> => {
   try {
-    const response = await api.get<ApiResponse<Product[]>>('/products');
-    return response.data.data;
+    const response = await api.get<Product[]>('/products');
+    return response.data;
   } catch (error) {
     console.error('Error fetching products:', error);
     throw error;
@@ -50,8 +50,8 @@ export const fetchProducts = async (): Promise<Product[]> => {
 
 export const fetchProductById = async (id: number): Promise<Product> => {
   try {
-    const response = await api.get<ApiResponse<Product>>(`/products/${id}`);
-    return response.data.data;
+    const response = await api.get<Product>(`/products/${id}`);
+    return response.data;
   } catch (error) {
     console.error(`Error fetching product ${id}:`, error);
     throw error;
@@ -60,8 +60,8 @@ export const fetchProductById = async (id: number): Promise<Product> => {
 
 export const createProduct = async (product: Omit<Product, 'id'>): Promise<Product> => {
   try {
-    const response = await api.post<ApiResponse<Product>>('/products', product);
-    return response.data.data;
+    const response = await api.post<Product>('/products', product);
+    return response.data;
   } catch (error) {
     console.error('Error creating product:', error);
     throw error;

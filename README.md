@@ -1,139 +1,171 @@
-# MCShop Web
+# MCShop Web Frontend
 
-Customer-facing web application of MCShop built with React, TypeScript, Docker, and Nginx.
+A React-based frontend application for the MCShop e-commerce platform, built with TypeScript and Tailwind CSS.
 
 ## Features
 
-- ⚛️ **React 18** with TypeScript
-- 🐳 **Docker** containerization with multi-stage builds
-- 🌐 **Nginx** reverse proxy for static file serving
-- 🔄 **Hot reloading** for development
-- 📱 **Responsive design** with modern UI
-- 🔌 **API integration** with axios for Spring Boot backend
-- 🚀 **Production-ready** build configuration
+- **Authentication System**
+  - User registration with OTP verification
+  - User login/logout
+  - Protected routes
+  - Token-based authentication with automatic refresh
+
+- **Product Management**
+  - Browse products with pagination
+  - Search and filter products by category
+  - View detailed product information
+  - Check product inventory status
+
+- **Shopping Cart**
+  - Add/remove products from cart
+  - Update quantities
+  - View cart summary
+  - Proceed to checkout
+
+- **User Profile**
+  - View and edit personal information
+  - Manage account details
+
+- **Order Management**
+  - Place orders with payment integration
+  - View order status
+
+## Technology Stack
+
+- **Frontend Framework**: React 18 with TypeScript
+- **Routing**: React Router DOM v6
+- **Styling**: Tailwind CSS
+- **HTTP Client**: Axios
+- **State Management**: React Context API
+- **Build Tool**: Create React App
+
+## API Integration
+
+The application integrates with the MCShop backend API running on `http://localhost:8080` and includes:
+
+- **Auth Service**: Login, registration, OTP, token refresh
+- **User Service**: Profile management
+- **Product Service**: Product listing and details
+- **Inventory Service**: Stock management
+- **Order Service**: Order placement and management
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn
+- MCShop backend running on `http://localhost:8080`
+
+### Installation
+
+1. Clone the repository:
+```bash
+git clone <repository-url>
+cd mcshop-web
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start the development server:
+```bash
+npm start
+```
+
+The application will be available at `http://localhost:3000`.
+
+### Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+REACT_APP_API_URL=http://localhost:8080
+```
 
 ## Project Structure
 
 ```
-mcshop-web/
-├── src/                    # React source code
-│   ├── components/         # React components
-│   ├── services/          # API services
-│   ├── types/             # TypeScript type definitions
-│   ├── App.tsx            # Main App component
-│   └── index.tsx          # Entry point
-├── public/                # Static assets
-├── Dockerfile             # Production Docker build
-├── Dockerfile.dev         # Development Docker build
-├── docker-compose.yml     # Docker Compose configuration
-├── nginx.conf             # Nginx configuration
-└── package.json           # Node.js dependencies
+src/
+├── components/          # Reusable UI components
+│   ├── Button.tsx
+│   ├── Input.tsx
+│   ├── ProductCard.tsx
+│   └── ProtectedRoute.tsx
+├── contexts/           # React Context providers
+│   ├── AuthContext.tsx
+│   └── CartContext.tsx
+├── pages/             # Page components
+│   ├── HomePage.tsx
+│   ├── LoginPage.tsx
+│   ├── RegisterPage.tsx
+│   ├── CartPage.tsx
+│   ├── ProfilePage.tsx
+│   └── ProductDetailPage.tsx
+├── services/          # API services
+│   └── api.ts
+├── types/            # TypeScript type definitions
+│   └── index.ts
+├── App.tsx           # Main application component
+└── index.tsx         # Application entry point
 ```
-
-## Quick Start
-
-### Prerequisites
-
-- Docker and Docker Compose
-- Node.js 18+ (for local development)
-- Spring Boot backend running on port 8080 (separate repository)
-
-### Development with Hot Reloading
-
-1. **Start the development environment:**
-   ```bash
-   docker-compose up frontend
-   ```
-
-2. **Access the application:**
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8080 (Spring Boot backend)
-
-3. **API endpoints (Spring Boot backend):**
-   - GET `/api/products` - List all products
-   - GET `/api/products/{id}` - Get specific product
-   - POST `/api/products` - Create new product
-
-### Production Build
-
-1. **Build and run production version:**
-   ```bash
-   docker-compose up frontend-prod
-   ```
-
-2. **Access the production application:**
-   - Frontend: http://localhost:8080
-   - Backend API: http://localhost:8080 (Spring Boot backend)
-
-### Local Development (without Docker)
-
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-2. **Start frontend development server:**
-   ```bash
-   npm start
-   ```
-
-3. **Ensure Spring Boot backend is running on port 8080**
-
-## API Integration
-
-The frontend is configured to communicate with the Spring Boot backend through:
-
-- **Development:** Direct API calls to http://localhost:8080/api
-- **Production:** Direct API calls to the same domain
-
-### API Service Layer
-
-The application includes a comprehensive API service layer (`src/services/api.ts`) with:
-
-- Axios instance with base configuration
-- Request/response interceptors
-- Error handling
-- Authentication token management
-- TypeScript type safety
-
-## Docker Configuration
-
-### Development (`Dockerfile.dev`)
-- Uses Node.js 18 Alpine
-- Includes all dependencies for hot reloading
-- Mounts source code for live updates
-
-### Production (`Dockerfile`)
-- Multi-stage build for optimized image size
-- Builds React app and serves with Nginx
-- Includes security headers and compression
-
-### Nginx Configuration
-- Static file serving with caching
-- React Router support
-- Gzip compression
-- Security headers
-
-## Environment Variables
-
-- `REACT_APP_API_URL` - Spring Boot backend API URL (defaults to http://localhost:8080/api)
-- `NODE_ENV` - Environment mode (development/production)
 
 ## Available Scripts
 
 - `npm start` - Start development server
-- `npm run build` - Build for production
+- `npm build` - Build for production
 - `npm test` - Run tests
-- `npm run eject` - Eject from Create React App
+- `npm eject` - Eject from Create React App
+
+## API Endpoints
+
+The application uses the following API endpoints:
+
+### Authentication
+- `GET /api/v1/auth/otp` - Request OTP
+- `POST /api/v1/auth/login` - User login
+- `POST /api/v1/auth/register` - User registration
+- `POST /api/v1/auth/refresh` - Refresh token
+
+### User Profile
+- `GET /api/v1/user/profile/me` - Get user profile
+- `POST /api/v1/user/profile` - Create user profile
+
+### Products
+- `GET /api/v1/product/all` - Get all products
+- `GET /api/v1/product/{id}` - Get product by ID
+- `GET /api/v1/product/inventory/{productId}` - Get inventory
+
+### Orders
+- `POST /api/v1/order/place` - Place order
+
+## Error Handling
+
+The application includes comprehensive error handling:
+
+- Network error handling with retry mechanisms
+- Form validation with user-friendly error messages
+- API error responses with proper error codes
+- Loading states for better UX
+
+## Security Features
+
+- JWT token-based authentication
+- Automatic token refresh
+- Protected routes
+- Secure API communication
+- Input validation and sanitization
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Test with Docker Compose
+4. Add tests if applicable
 5. Submit a pull request
 
 ## License
 
-This project is part of the MCShop application suite.
+This project is licensed under the MIT License.

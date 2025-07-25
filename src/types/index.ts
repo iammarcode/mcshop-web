@@ -93,7 +93,6 @@ export interface OrderProduct {
 }
 
 export interface PlaceOrderRequest {
-  userId: string;
   products: OrderProduct[];
   userAddressId: string;
   paymentMethodId: string;

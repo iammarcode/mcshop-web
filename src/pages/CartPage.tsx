@@ -4,12 +4,15 @@ import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
 import { placeOrder } from '../services/api';
 import Button from '../components/Button';
+import ErrorMessage from '../components/ErrorMessage';
+import { validateOrderData } from '../utils/orderTest';
 
 const CartPage: React.FC = () => {
   const navigate = useNavigate();
   const { items, total, updateQuantity, removeFromCart, clearCart } = useCart();
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleQuantityChange = (productId: string, quantity: number) => {
     if (quantity <= 0) {
@@ -33,10 +36,10 @@ const CartPage: React.FC = () => {
 
     try {
       setLoading(true);
+      setError(null);
       
       // For demo purposes, using placeholder values
       const orderData = {
-        userId: user.id,
         products: items.map(item => ({
           productId: item.product.id,
           quantity: item.quantity,
@@ -45,6 +48,12 @@ const CartPage: React.FC = () => {
         paymentMethodId: 'demo-payment-method', // In real app, user would select payment method
         currency: 'USD',
       };
+
+      // Validate order data before sending
+      if (!validateOrderData(orderData)) {
+        setError('Invalid order data. Please try again.');
+        return;
+      }
 
       const response = await placeOrder(orderData);
       
@@ -59,7 +68,7 @@ const CartPage: React.FC = () => {
         }
       }
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Failed to place order');
+      setError(error instanceof Error ? error.message : 'Failed to place order');
     } finally {
       setLoading(false);
     }
@@ -91,6 +100,16 @@ const CartPage: React.FC = () => {
             Continue Shopping
           </Button>
         </div>
+
+        {error && (
+          <ErrorMessage
+            error={error}
+            onRetry={handleCheckout}
+            onClose={() => setError(null)}
+            showRetry={true}
+            showClose={true}
+          />
+        )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Cart Items */}

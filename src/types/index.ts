@@ -17,9 +17,6 @@ export interface RegisterRequest {
   password: string;
   username: string;
   otp: string;
-  firstname: string;
-  lastname: string;
-  phone: string;
 }
 
 export interface OtpRequest {

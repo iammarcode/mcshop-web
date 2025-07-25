@@ -1,10 +1,10 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { AuthState, UserProfile } from '../types';
+import { AuthState, UserProfile, RegisterRequest } from '../types';
 import { login, register, getUserProfile, logout as apiLogout, isAuthenticated } from '../services/api';
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
-  register: (userData: any) => Promise<void>;
+  register: (userData: RegisterRequest) => Promise<void>;
   logout: () => void;
   loadUser: () => Promise<void>;
 }
@@ -116,7 +116,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   };
 
-  const registerUser = async (userData: any) => {
+  const registerUser = async (userData: RegisterRequest) => {
     try {
       dispatch({ type: 'AUTH_START' });
       

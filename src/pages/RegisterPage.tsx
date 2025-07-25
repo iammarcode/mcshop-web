@@ -1,238 +1,288 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { Form, Input, Button, Card, Typography, Divider, Alert, Space, Row, Col } from 'antd';
+import { UserOutlined, MailOutlined, LockOutlined, PhoneOutlined, KeyOutlined } from '@ant-design/icons';
 import { useAuth } from '../contexts/AuthContext';
 import { requestOtp } from '../services/api';
-import Button from '../components/Button';
-import Input from '../components/Input';
+
+const { Title, Text } = Typography;
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
   const { register } = useAuth();
+  const [form] = Form.useForm();
   
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    confirmPassword: '',
-    username: '',
-    firstname: '',
-    lastname: '',
-    phone: '',
-    otp: '',
-  });
-  
-  const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [otpLoading, setOtpLoading] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-    
-    if (!formData.email) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
-    }
-    
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-    
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-    
-    if (!formData.username) {
-      newErrors.username = 'Username is required';
-    }
-    
-    if (!formData.firstname) {
-      newErrors.firstname = 'First name is required';
-    }
-    
-    if (!formData.lastname) {
-      newErrors.lastname = 'Last name is required';
-    }
-    
-    if (!formData.phone) {
-      newErrors.phone = 'Phone number is required';
-    }
-    
-    if (!formData.otp) {
-      newErrors.otp = 'OTP is required';
-    } else if (formData.otp.length !== 6) {
-      newErrors.otp = 'OTP must be 6 digits';
-    }
-    
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) return;
-    
-    try {
-      setLoading(true);
-      await register(formData);
-      navigate('/');
-    } catch (error) {
-      setErrors({ general: error instanceof Error ? error.message : 'Registration failed' });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [showOtpInput, setShowOtpInput] = useState(false);
+  const [error, setError] = useState<string>('');
 
   const handleOtpRequest = async () => {
-    if (!formData.email || !/\S+@\S+\.\S+/.test(formData.email)) {
-      setErrors({ email: 'Please enter a valid email first' });
+    const email = form.getFieldValue('email');
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      setError('Please enter a valid email first');
       return;
     }
     
     try {
       setOtpLoading(true);
-      await requestOtp(formData.email);
-      setOtpSent(true);
-      setErrors({});
-      alert('OTP sent to your email!');
+      setError('');
+      await requestOtp(email);
+      setShowOtpInput(true);
+      alert('OTP sent to your email! Please check your inbox.');
     } catch (error) {
-      setErrors({ otp: error instanceof Error ? error.message : 'Failed to send OTP' });
+      setError(error instanceof Error ? error.message : 'Failed to send OTP');
     } finally {
       setOtpLoading(false);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Create your account
-        </h2>
-        <p className="mt-2 text-center text-sm text-gray-600">
-          Or{' '}
-          <Link to="/login" className="font-medium text-blue-600 hover:text-blue-500">
-            sign in to your existing account
-          </Link>
-        </p>
-      </div>
+  const handleSubmit = async (values: any) => {
+    try {
+      setLoading(true);
+      setError('');
+      
+      // Only send required fields to backend
+      const registerData = {
+        email: values.email,
+        password: values.password,
+        username: values.username,
+        otp: values.otp,
+      };
+      
+      await register(registerData);
+      navigate('/');
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={handleSubmit}>
-            {errors.general && (
-              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded">
-                {errors.general}
-              </div>
-            )}
-            
-            <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="First Name"
-                value={formData.firstname}
-                onChange={(value) => setFormData({ ...formData, firstname: value })}
-                placeholder="John"
-                required
-                error={errors.firstname}
-              />
-              
-              <Input
-                label="Last Name"
-                value={formData.lastname}
-                onChange={(value) => setFormData({ ...formData, lastname: value })}
-                placeholder="Doe"
-                required
-                error={errors.lastname}
-              />
-            </div>
-            
-            <Input
-              label="Username"
-              value={formData.username}
-              onChange={(value) => setFormData({ ...formData, username: value })}
-              placeholder="johndoe"
-              required
-              error={errors.username}
-            />
-            
-            <Input
-              label="Email Address"
-              type="email"
-              value={formData.email}
-              onChange={(value) => setFormData({ ...formData, email: value })}
-              placeholder="john@example.com"
-              required
-              error={errors.email}
-            />
-            
-            <Input
-              label="Phone Number"
-              type="tel"
-              value={formData.phone}
-              onChange={(value) => setFormData({ ...formData, phone: value })}
-              placeholder="+1234567890"
-              required
-              error={errors.phone}
-            />
-            
-            <Input
-              label="Password"
-              type="password"
-              value={formData.password}
-              onChange={(value) => setFormData({ ...formData, password: value })}
-              placeholder="Enter your password"
-              required
-              error={errors.password}
-            />
-            
-            <Input
-              label="Confirm Password"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={(value) => setFormData({ ...formData, confirmPassword: value })}
-              placeholder="Confirm your password"
-              required
-              error={errors.confirmPassword}
-            />
-            
-            <div className="flex gap-2">
-              <Input
-                label="OTP Code"
-                value={formData.otp}
-                onChange={(value) => setFormData({ ...formData, otp: value })}
-                placeholder="123456"
-                required
-                error={errors.otp}
-                className="flex-1"
-              />
-              <div className="flex flex-col justify-end">
-                <Button
-                  onClick={handleOtpRequest}
-                  loading={otpLoading}
-                  disabled={otpLoading || otpSent}
-                  size="small"
-                  variant="outline"
-                >
-                  {otpSent ? 'Sent' : 'Send OTP'}
-                </Button>
-              </div>
-            </div>
-            
-            <div>
-              <Button
-                type="submit"
-                loading={loading}
-                disabled={loading || !otpSent}
-                className="w-full"
-              >
-                Create Account
-              </Button>
-            </div>
-          </form>
+  return (
+    <div style={{ 
+      minHeight: '100vh', 
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '20px'
+    }}>
+      <Card 
+        style={{ 
+          width: '100%', 
+          maxWidth: '500px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+          borderRadius: '12px'
+        }}
+      >
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <Title level={2} style={{ marginBottom: '8px', color: '#1890ff' }}>
+            Create Your Account
+          </Title>
+          <Text type="secondary">
+            Or{' '}
+            <Link to="/login" style={{ color: '#1890ff' }}>
+              sign in to your existing account
+            </Link>
+          </Text>
         </div>
-      </div>
+
+        {error && (
+          <Alert
+            message={error}
+            type="error"
+            showIcon
+            style={{ marginBottom: '16px' }}
+            closable
+            onClose={() => setError('')}
+          />
+        )}
+
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          autoComplete="off"
+        >
+          {/* Required Fields Section */}
+          <div style={{ marginBottom: '24px' }}>
+            <Title level={4} style={{ marginBottom: '16px', color: '#262626' }}>
+              Required Information
+            </Title>
+            
+            <Form.Item
+              name="username"
+              label="Username"
+              rules={[
+                { required: true, message: 'Please enter your username!' },
+                { min: 3, message: 'Username must be at least 3 characters!' }
+              ]}
+            >
+              <Input 
+                prefix={<UserOutlined />} 
+                placeholder="Enter your username"
+                size="large"
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="email"
+              label="Email Address"
+              rules={[
+                { required: true, message: 'Please enter your email!' },
+                { type: 'email', message: 'Please enter a valid email!' }
+              ]}
+            >
+              <Input 
+                prefix={<MailOutlined />} 
+                placeholder="Enter your email"
+                size="large"
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="password"
+              label="Password"
+              rules={[
+                { required: true, message: 'Please enter your password!' },
+                { min: 6, message: 'Password must be at least 6 characters!' }
+              ]}
+            >
+              <Input.Password 
+                prefix={<LockOutlined />} 
+                placeholder="Enter your password"
+                size="large"
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="confirmPassword"
+              label="Confirm Password"
+              dependencies={['password']}
+              rules={[
+                { required: true, message: 'Please confirm your password!' },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue('password') === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(new Error('Passwords do not match!'));
+                  },
+                }),
+              ]}
+            >
+              <Input.Password 
+                prefix={<LockOutlined />} 
+                placeholder="Confirm your password"
+                size="large"
+              />
+            </Form.Item>
+          </div>
+
+          {/* Optional Fields Section */}
+          <div style={{ marginBottom: '24px' }}>
+            <Title level={4} style={{ marginBottom: '16px', color: '#262626' }}>
+              Optional Information
+            </Title>
+            
+            <Row gutter={16}>
+              <Col span={12}>
+                <Form.Item
+                  name="firstname"
+                  label="First Name"
+                >
+                  <Input 
+                    placeholder="John"
+                    size="large"
+                  />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item
+                  name="lastname"
+                  label="Last Name"
+                >
+                  <Input 
+                    placeholder="Doe"
+                    size="large"
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+
+            <Form.Item
+              name="phone"
+              label="Phone Number"
+            >
+              <Input 
+                prefix={<PhoneOutlined />} 
+                placeholder="+1234567890"
+                size="large"
+              />
+            </Form.Item>
+          </div>
+
+          {/* OTP Section */}
+          <div style={{ marginBottom: '24px' }}>
+            <Title level={4} style={{ marginBottom: '16px', color: '#262626' }}>
+              Email Verification
+            </Title>
+            
+            <Space.Compact style={{ width: '100%' }}>
+              <Form.Item
+                name="otp"
+                style={{ flex: 1 }}
+                rules={[
+                  { required: true, message: 'Please enter OTP!' },
+                  { len: 6, message: 'OTP must be 6 digits!' }
+                ]}
+              >
+                <Input 
+                  prefix={<KeyOutlined />} 
+                  placeholder="Enter 6-digit OTP"
+                  size="large"
+                  disabled={!showOtpInput}
+                  maxLength={6}
+                />
+              </Form.Item>
+              <Button
+                onClick={handleOtpRequest}
+                loading={otpLoading}
+                disabled={otpLoading || showOtpInput}
+                size="large"
+                type="default"
+              >
+                {showOtpInput ? 'Sent' : 'Request OTP'}
+              </Button>
+            </Space.Compact>
+            
+            {showOtpInput && (
+              <Text type="secondary" style={{ fontSize: '12px', display: 'block', marginTop: '8px' }}>
+                OTP sent to <strong>{form.getFieldValue('email')}</strong>
+              </Text>
+            )}
+          </div>
+
+          <Form.Item>
+            <Button
+              type="primary"
+              htmlType="submit"
+              loading={loading}
+              disabled={!showOtpInput}
+              size="large"
+              block
+              style={{ 
+                height: '48px',
+                fontSize: '16px',
+                fontWeight: '500'
+              }}
+            >
+              Create Account
+            </Button>
+          </Form.Item>
+        </Form>
+      </Card>
     </div>
   );
 };

@@ -5,15 +5,13 @@ export const createTestOrderData = (products: any[]) => {
       productId: item.product.id,
       quantity: item.quantity,
     })),
-    userAddressId: 'demo-address-id',
-    paymentMethodId: 'demo-payment-method',
     currency: 'USD',
   };
 };
 
 // Validate order data structure
 export const validateOrderData = (orderData: any): boolean => {
-  const requiredFields = ['products', 'userAddressId', 'paymentMethodId', 'currency'];
+  const requiredFields = ['products', 'currency'];
   
   for (const field of requiredFields) {
     if (!(field in orderData)) {

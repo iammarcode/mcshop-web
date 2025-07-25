@@ -44,8 +44,6 @@ const CartPage: React.FC = () => {
           productId: item.product.id,
           quantity: item.quantity,
         })),
-        userAddressId: 'demo-address-id', // In real app, user would select address
-        paymentMethodId: 'demo-payment-method', // In real app, user would select payment method
         currency: 'USD',
       };
 

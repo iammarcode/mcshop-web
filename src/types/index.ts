@@ -91,8 +91,7 @@ export interface OrderProduct {
 
 export interface PlaceOrderRequest {
   products: OrderProduct[];
-  userAddressId: string;
-  paymentMethodId: string;
+  userAddressId?: string;
   currency: string;
 }
 

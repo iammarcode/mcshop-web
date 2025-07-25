@@ -1,71 +1,60 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import 'antd/dist/reset.css';
+import { AuthProvider } from './contexts/AuthContext';
+import { CartProvider } from './contexts/CartContext';
+import ProtectedRoute from './components/ProtectedRoute';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import CartPage from './pages/CartPage';
+import ProfilePage from './pages/ProfilePage';
+import ProductDetailPage from './pages/ProductDetailPage';
 import './App.css';
-import { fetchProducts } from './services/api';
-import { Product } from './types';
 
 function App() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        setLoading(true);
-        const data = await fetchProducts();
-        setProducts(data);
-        setError(null);
-      } catch (err) {
-        setError('Failed to load products');
-        console.error('Error loading products:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProducts();
-  }, []);
-
   return (
-    <div className="App">
-      <header className="App-header">
-        <h1>MCShop - Customer Portal</h1>
-        <p>Welcome to our online store</p>
-      </header>
-      
-      <main className="App-main">
-        {loading && (
-          <div className="loading">
-            <div className="spinner"></div>
-            <p>Loading products...</p>
+    <Router>
+      <AuthProvider>
+        <CartProvider>
+          <div className="App">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              
+              {/* Protected Routes */}
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <HomePage />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/cart" element={
+                <ProtectedRoute>
+                  <CartPage />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/profile" element={
+                <ProtectedRoute>
+                  <ProfilePage />
+                </ProtectedRoute>
+              } />
+              
+              <Route path="/product/:id" element={
+                <ProtectedRoute>
+                  <ProductDetailPage />
+                </ProtectedRoute>
+              } />
+              
+              {/* Fallback */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
           </div>
-        )}
-        
-        {error && (
-          <div className="error">
-            <p>{error}</p>
-            <button onClick={() => window.location.reload()}>Retry</button>
-          </div>
-        )}
-        
-        {!loading && !error && (
-          <div className="products-grid">
-            {products.length === 0 ? (
-              <p>No products available</p>
-            ) : (
-              products.map((product) => (
-                <div key={product.id} className="product-card">
-                  <h3>{product.name}</h3>
-                  <p className="price">${product.price}</p>
-                  <p className="description">{product.description}</p>
-                  <button className="add-to-cart">Add to Cart</button>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-      </main>
-    </div>
+        </CartProvider>
+      </AuthProvider>
+    </Router>
   );
 }
 

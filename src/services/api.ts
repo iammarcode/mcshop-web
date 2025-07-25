@@ -110,7 +110,9 @@ const handleApiError = (error: AxiosError<ApiError>): never => {
 
 export const requestOtp = async (email: string): Promise<void> => {
   try {
-    await api.get<ApiResponse<null>>('/api/v1/auth/otp', {
+    await api.request<ApiResponse<null>>({
+      method: 'GET',
+      url: '/api/v1/auth/otp',
       params: { email }
     });
   } catch (error) {
